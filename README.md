@@ -1,31 +1,12 @@
 # Stock Operations Tax Calculator
 
-A simple CLI tool to calculate taxes on stock operations based on Brazilian tax rules.
+A simple CLI tool to calculate taxes on stock operations based on specific tax rules.
 
 ## Overview
 
 This tool calculates taxes for stock operations based on the following rules:
 
-1. A loss in a stock operation can be compensated in the following months
-2. You don't pay taxes when the total sell operations in a month is less than R$ 20.000,00
-3. You pay 20% of taxes on profit when the total sell operations in a month is greater than R$ 20.000,00
-
-## Prerequisites
-
-- Node.js (v18 or later)
-
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/gm1357/stock-operations-tax-calculator-cli.git
-
-# Navigate to the project directory
-cd stock-operations-tax-calculator-cli
-
-# Install dependencies
-npm install
-```
+1.
 
 ## Usage
 
@@ -48,20 +29,34 @@ Example input:
 
 ### Running the CLI
 
+If you don't have Node.js installed, please download the latest LTS version and install it from [nodejs.org](https://nodejs.org/en/download/).
+
+Or, use [nvm (Node Version Manager)](https://github.com/nvm-sh/nvm) to install and use latest version:
+
+```bash
+nvm install
+nvm use
+```
+
+Run the CLI tool interactively:
+
+```bash
+npm start
+# Then input your JSON and press Enter
+# Press Enter again with an empty line to finish input
+
+# Or directly with Node.js
+node src/index.js
+```
+
+You can also provide input from a file and even redirect the output to another file:
+
 ```bash
 # Using npm script
 npm start < input.txt > output.txt
 
 # Or directly with Node.js
 node src/index.js < input.txt > output.txt
-```
-
-You can also run it interactively:
-
-```bash
-npm start
-# Then input your JSON and press Enter
-# Press Enter again with an empty line to finish input
 ```
 
 ### Output Format
