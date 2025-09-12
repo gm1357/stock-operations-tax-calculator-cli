@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculatePriceWeightedAverage } from '../../../src/utils/capital-operations.js';
+import { calculatePriceWeightedAverage } from '../../../src/domain/capital-operations.js';
 
 describe('calculatePriceWeightedAverage', () => {
   it('should calculate the correct weighted average price', () => {

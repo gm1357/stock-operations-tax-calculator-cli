@@ -1,6 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateManyLedgersTaxes } from '../../src/tax-calculator.js';
+import {
+  calculateManyLedgersTaxes,
+  parseLedgers,
+} from '../../../src/domain/ledgers.js';
 
 describe('calculateManyLedgersTaxes', () => {
   it('should return no taxes for empty ledgers', () => {
@@ -297,5 +300,29 @@ describe('calculateManyLedgersTaxes', () => {
     const calculatedTaxes = calculateManyLedgersTaxes(ledgers);
 
     assert.deepStrictEqual(calculatedTaxes, expectedTaxes);
+  });
+});
+
+describe('parseLedgers', () => {
+  it('should parse input string into ledgers objects', () => {
+    const lines = [
+      '[{"operation":"buy", "unit-cost":10.00, "quantity":100}, {"operation":"sell", "unit-cost":15.00, "quantity":50}, {"operation":"sell", "unit-cost":15.00, "quantity":50}]',
+      '[{"operation":"buy", "unit-cost":10.00, "quantity":10000}, {"operation":"sell", "unit-cost":20.00, "quantity":5000}, {"operation":"sell", "unit-cost":5.00, "quantity":5000}]',
+    ];
+    const expectedLedgers = [
+      [
+        { operation: 'buy', 'unit-cost': 10.0, quantity: 100 },
+        { operation: 'sell', 'unit-cost': 15.0, quantity: 50 },
+        { operation: 'sell', 'unit-cost': 15.0, quantity: 50 },
+      ],
+      [
+        { operation: 'buy', 'unit-cost': 10.0, quantity: 10000 },
+        { operation: 'sell', 'unit-cost': 20.0, quantity: 5000 },
+        { operation: 'sell', 'unit-cost': 5.0, quantity: 5000 },
+      ],
+    ];
+
+    const parsedLedgers = parseLedgers(lines);
+    assert.deepStrictEqual(parsedLedgers, expectedLedgers);
   });
 });

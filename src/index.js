@@ -1,26 +1,15 @@
-import readline from 'node:readline';
-import { stdin as input, stdout as output, exit } from 'node:process';
-import { calculateManyLedgersTaxes } from './tax-calculator.js';
+import { exit } from 'node:process';
+import { readInputLines, outputToStdOut } from './utils/io-handler.js';
+import { parseLedgers, calculateManyLedgersTaxes } from './domain/ledgers.js';
 
-const rl = readline.createInterface({
-  input,
-  output,
-});
+try {
+  const lines = await readInputLines();
+  const operationsLedgers = parseLedgers(lines);
 
-const operationsLedgers = [];
-
-rl.on('line', (line) => {
-  if (line.trim() === '') {
-    rl.close();
-  }
-
-  const operationsLedger = JSON.parse(line);
-  operationsLedgers.push(operationsLedger);
-});
-
-rl.on('close', () => {
-  calculateManyLedgersTaxes(operationsLedgers).forEach((result) => {
-    console.log(JSON.stringify(result));
-  });
+  const results = calculateManyLedgersTaxes(operationsLedgers);
+  outputToStdOut(results);
   exit(0);
-});
+} catch (error) {
+  console.error('Error processing input:', error);
+  exit(1);
+}

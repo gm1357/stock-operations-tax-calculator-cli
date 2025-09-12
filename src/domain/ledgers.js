@@ -1,5 +1,9 @@
 import { OPERATION_TYPE, TAX_FREE_THRESHOLD, TAX_RATE } from './constants.js';
-import { calculatePriceWeightedAverage } from './utils/capital-operations.js';
+import { calculatePriceWeightedAverage } from './capital-operations.js';
+
+export function parseLedgers(lines) {
+  return lines.map((line) => JSON.parse(line));
+}
 
 export function calculateManyLedgersTaxes(operationsLedgers) {
   return operationsLedgers.map((ledger) => calculateLedgerTaxes(ledger));
