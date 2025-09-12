@@ -21,38 +21,49 @@ function calculateLedgerTaxes(operationsLedger) {
       quantity,
       'unit-cost': unitCost,
     } = operation;
-    // Buy operation
-    if (operationType === OPERATION_TYPE.BUY) {
-      weightedAveragePrice = calculatePriceWeightedAverage({
-        currentStockQuantity: stockQuantity,
-        previousWeightedAverage: weightedAveragePrice,
-        boughtQuantity: quantity,
-        currentUnitCost: unitCost,
-      });
-      stockQuantity += quantity;
-      taxes.push(0);
-      continue;
+
+    let tax = 0;
+
+    switch (operationType) {
+      case OPERATION_TYPE.BUY: {
+        weightedAveragePrice = calculatePriceWeightedAverage({
+          currentStockQuantity: stockQuantity,
+          previousWeightedAverage: weightedAveragePrice,
+          boughtQuantity: quantity,
+          currentUnitCost: unitCost,
+        });
+        stockQuantity += quantity;
+        break;
+      }
+
+      case OPERATION_TYPE.SELL: {
+        stockQuantity -= quantity;
+
+        if (unitCost <= weightedAveragePrice) {
+          const loss = (weightedAveragePrice - unitCost) * quantity;
+          accumulatedLoss += loss;
+          break;
+        }
+
+        if (unitCost * quantity <= TAX_FREE_THRESHOLD) {
+          break;
+        }
+
+        const profit = (unitCost - weightedAveragePrice) * quantity;
+        const profitAfterLossCompensation = Math.max(
+          0,
+          profit - accumulatedLoss,
+        );
+        accumulatedLoss = Math.max(0, accumulatedLoss - profit);
+        tax = profitAfterLossCompensation * TAX_RATE;
+
+        break;
+      }
+      default:
+        throw new Error(`Unknown operation type: ${operationType}`);
     }
 
-    // Sell operation
-    stockQuantity -= quantity;
-
-    if (unitCost <= weightedAveragePrice) {
-      const loss = (weightedAveragePrice - unitCost) * quantity;
-      accumulatedLoss += loss;
-      taxes.push(0);
-      continue;
-    }
-
-    if (unitCost * quantity <= TAX_FREE_THRESHOLD) {
-      taxes.push(0);
-      continue;
-    }
-
-    const profit = (unitCost - weightedAveragePrice) * quantity;
-    const profitAfterLossCompensation = Math.max(0, profit - accumulatedLoss);
-    accumulatedLoss = Math.max(0, accumulatedLoss - profit);
-    taxes.push(profitAfterLossCompensation * TAX_RATE);
+    taxes.push(tax);
   }
 
   return taxes.map((tax) => ({ tax }));

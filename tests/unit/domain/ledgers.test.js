@@ -100,6 +100,20 @@ describe('calculateManyLedgersTaxes', () => {
     assert.deepStrictEqual(calculatedTaxes, expectedTaxes);
   });
 
+  it('should throw an error for unknown operation types', () => {
+    const ledgers = [
+      [
+        { operation: 'buy', 'unit-cost': 10, quantity: 100 },
+        { operation: 'hold', 'unit-cost': 15, quantity: 50 },
+      ],
+    ];
+
+    assert.throws(
+      () => calculateManyLedgersTaxes(ledgers),
+      /Unknown operation type: hold/,
+    );
+  });
+
   it('should calculate taxes correctly for Case #1', () => {
     const ledgers = [
       [
