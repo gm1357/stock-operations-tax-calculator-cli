@@ -13,7 +13,7 @@ This tool calculates taxes for stock operations based on the following rules:
 
 ## Usage
 
-The CLI tool accepts input through stdin and outputs the results to stdout. Each input line should contain a JSON array with stock operations for a specific month.
+The CLI tool accepts input through stdin and outputs the results to stdout. Each input line should contain a JSON array with stock operations.
 
 ### Input Format
 
@@ -28,6 +28,15 @@ Example input:
 ```json
 [{"operation":"buy", "unit-cost":10.00, "quantity":100}, {"operation":"sell", "unit-cost":15.00, "quantity":50}, {"operation":"sell", "unit-cost":15.00, "quantity":50}]
 [{"operation":"buy", "unit-cost":10.00, "quantity":10000}, {"operation":"sell", "unit-cost":20.00, "quantity":5000}, {"operation":"sell", "unit-cost":5.00, "quantity":5000}]
+```
+
+### Output Format
+
+The output will be JSON objects, each representing the tax to be paid for a specific operation:
+
+```json
+[{"tax":0}, {"tax":0}, {"tax":0}]
+[{"tax":0}, {"tax":10000}, {"tax":0}]
 ```
 
 ### Running the CLI
@@ -60,15 +69,6 @@ npm start < input.txt > output.txt
 
 # Or directly with Node.js
 node src/index.js < input.txt > output.txt
-```
-
-### Output Format
-
-The output will be JSON objects, each representing the tax to be paid for a specific operation:
-
-```json
-[{"tax":0}, {"tax":0}, {"tax":0}]
-[{"tax":0}, {"tax":10000}, {"tax":0}]
 ```
 
 ## Running Tests

@@ -1,5 +1,5 @@
 import { OPERATION_TYPE, TAX_FREE_THRESHOLD, TAX_RATE } from './constants.js';
-import { calculatePriceWeightedAverage } from './capital-operations.js';
+import { calculateWeightedAverage } from '../utils/math.js';
 
 export function parseLedgers(lines) {
   return lines.map((line) => JSON.parse(line));
@@ -67,4 +67,16 @@ function calculateLedgerTaxes(operationsLedger) {
   }
 
   return taxes.map((tax) => ({ tax }));
+}
+
+function calculatePriceWeightedAverage({
+  currentStockQuantity,
+  previousWeightedAverage,
+  boughtQuantity,
+  currentUnitCost,
+}) {
+  return calculateWeightedAverage({
+    weights: [currentStockQuantity, boughtQuantity],
+    values: [previousWeightedAverage, currentUnitCost],
+  });
 }
