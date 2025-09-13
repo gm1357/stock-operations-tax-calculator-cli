@@ -97,4 +97,12 @@ describe('Integration Test - CLI', () => {
       execHandler(expectedOutput, done),
     );
   });
+
+  it('should throw an error for invalid JSON input', (_, done) => {
+    exec(`echo 'invalid json' | node ${cliPath}`, (error) => {
+      assert.match(error.message, /Error processing input:/);
+      assert.match(error.message, /"invalid json" is not valid JSON/);
+      done();
+    });
+  });
 });
