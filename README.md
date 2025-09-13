@@ -6,7 +6,10 @@ A simple CLI tool to calculate taxes on stock operations based on specific tax r
 
 This tool calculates taxes for stock operations based on the following rules:
 
-1.
+1. No tax is applied on "buy" operations.
+2. No tax is applied on "sell" operations if the total amount is less than or equal to $20,000.
+3. If the total amount of a "sell" operation exceeds $20,000, a tax of 20% is applied on the profit.
+4. If there is a loss in any operation, it is used to offset profits in subsequent operations.
 
 ## Usage
 
@@ -80,5 +83,5 @@ npm test
 npm run test:watch
 
 # Run specific test file
-node --test tests/unit/tax-calculator.test.js
+node --test tests/unit/domain/ledgers.test.js
 ```
