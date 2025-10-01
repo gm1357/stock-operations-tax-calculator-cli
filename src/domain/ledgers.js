@@ -1,4 +1,9 @@
-import { OPERATION_TYPE, TAX_FREE_THRESHOLD, TAX_RATE } from './constants.js';
+import {
+  INSUFFICIENT_STOCK_ERROR,
+  OPERATION_TYPE,
+  TAX_FREE_THRESHOLD,
+  TAX_RATE,
+} from './constants.js';
 import { calculateWeightedAverage } from '../utils/math.js';
 
 export function parseLedgers(lines) {
@@ -10,7 +15,7 @@ export function calculateManyLedgersTaxes(operationsLedgers) {
 }
 
 function calculateLedgerTaxes(operationsLedger) {
-  const taxes = [];
+  const results = [];
   let weightedAveragePrice = 0;
   let stockQuantity = 0;
   let accumulatedLoss = 0;
@@ -22,8 +27,6 @@ function calculateLedgerTaxes(operationsLedger) {
       'unit-cost': unitCost,
     } = operation;
 
-    let tax = 0;
-
     switch (operationType) {
       case OPERATION_TYPE.BUY: {
         weightedAveragePrice = calculatePriceWeightedAverage({
@@ -33,19 +36,31 @@ function calculateLedgerTaxes(operationsLedger) {
           currentUnitCost: unitCost,
         });
         stockQuantity += quantity;
+
+        results.push({ tax: 0 });
+
         break;
       }
 
       case OPERATION_TYPE.SELL: {
+        if (stockQuantity - quantity < 0) {
+          results.push({ error: INSUFFICIENT_STOCK_ERROR });
+          continue;
+        }
+
         stockQuantity -= quantity;
 
         if (unitCost <= weightedAveragePrice) {
           const loss = (weightedAveragePrice - unitCost) * quantity;
           accumulatedLoss += loss;
+
+          results.push({ tax: 0 });
+
           break;
         }
 
         if (unitCost * quantity <= TAX_FREE_THRESHOLD) {
+          results.push({ tax: 0 });
           break;
         }
 
@@ -55,18 +70,17 @@ function calculateLedgerTaxes(operationsLedger) {
           profit - accumulatedLoss,
         );
         accumulatedLoss = Math.max(0, accumulatedLoss - profit);
-        tax = profitAfterLossCompensation * TAX_RATE;
+        const tax = profitAfterLossCompensation * TAX_RATE;
+        results.push({ tax });
 
         break;
       }
       default:
         throw new Error(`Unknown operation type: ${operationType}`);
     }
-
-    taxes.push(tax);
   }
 
-  return taxes.map((tax) => ({ tax }));
+  return results;
 }
 
 function calculatePriceWeightedAverage({

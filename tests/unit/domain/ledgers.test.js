@@ -4,6 +4,7 @@ import {
   calculateManyLedgersTaxes,
   parseLedgers,
 } from '../../../src/domain/ledgers.js';
+import { INSUFFICIENT_STOCK_ERROR } from '../../../src/domain/constants.js';
 
 describe('calculateManyLedgersTaxes', () => {
   it('should return no taxes for empty ledgers', () => {
@@ -309,6 +310,38 @@ describe('calculateManyLedgersTaxes', () => {
         { tax: 1000 },
         { tax: 2400 },
       ],
+    ];
+
+    const calculatedTaxes = calculateManyLedgersTaxes(ledgers);
+
+    assert.deepStrictEqual(calculatedTaxes, expectedTaxes);
+  });
+
+  it('should output error when trying to sell more than the current stock count', () => {
+    const ledgers = [
+      [
+        { operation: 'buy', 'unit-cost': 5000, quantity: 10 },
+        { operation: 'sell', 'unit-cost': 4000, quantity: 15 },
+      ],
+    ];
+    const expectedTaxes = [[{ tax: 0 }, { error: INSUFFICIENT_STOCK_ERROR }]];
+
+    const calculatedTaxes = calculateManyLedgersTaxes(ledgers);
+
+    assert.deepStrictEqual(calculatedTaxes, expectedTaxes);
+  });
+
+  it('should allow sell operation after buying more stocks after failed sell opeartion', () => {
+    const ledgers = [
+      [
+        { operation: 'buy', 'unit-cost': 5000, quantity: 10 },
+        { operation: 'sell', 'unit-cost': 4000, quantity: 15 },
+        { operation: 'buy', 'unit-cost': 5000, quantity: 5 },
+        { operation: 'sell', 'unit-cost': 4000, quantity: 15 },
+      ],
+    ];
+    const expectedTaxes = [
+      [{ tax: 0 }, { error: INSUFFICIENT_STOCK_ERROR }, { tax: 0 }, { tax: 0 }],
     ];
 
     const calculatedTaxes = calculateManyLedgersTaxes(ledgers);

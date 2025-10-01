@@ -2,6 +2,7 @@ import { exec } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import path from 'node:path';
+import { INSUFFICIENT_STOCK_ERROR } from '../../src/domain/constants.js';
 
 describe('Integration Test - CLI', () => {
   const cliPath = path.resolve('./src/index.js');
@@ -104,5 +105,20 @@ describe('Integration Test - CLI', () => {
       assert.match(error.message, /"invalid json" is not valid JSON/);
       done();
     });
+  });
+
+  it('should process single line input with overselling stock produce correct output', (_, done) => {
+    const input = [
+      '[{"operation":"buy", "unit-cost":10.00, "quantity":100}, {"operation":"sell", "unit-cost":15.00, "quantity":150}]',
+      '',
+    ].join('\n');
+
+    const expectedOutput =
+      [`[{"tax":0},{"error":"${INSUFFICIENT_STOCK_ERROR}"}]`].join('\n') + '\n';
+
+    const child = exec(`node ${cliPath}`, execHandler(expectedOutput, done));
+
+    child.stdin.write(input);
+    child.stdin.end();
   });
 });
