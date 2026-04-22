@@ -1,20 +1,37 @@
 {
   "name": "stock-operations-tax-calculator-cli",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "dist/ui/cli.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node dist/ui/cli.js",
+    "build": "babel src --out-dir dist",
+    "build:watch": "babel src --out-dir dist --watch",
+    "pretest": "npm run build",
     "test": "node --test",
-    "test:watch": "node --test --watch"
+    "test:watch": "concurrently -n build,test \"npm:build:watch\" \"node --test --watch\""
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@babel/cli": "^7.28.6",
+    "@babel/preset-react": "^7.28.5",
     "@eslint/js": "^9.35.0",
+    "concurrently": "^9.2.1",
     "eslint": "^9.35.0",
+    "eslint-plugin-react": "^7.37.5",
     "globals": "^16.4.0",
     "prettier": "3.6.2"
+  },
+  "dependencies": {
+    "ink": "^7.0.1",
+    "meow": "^14.1.0",
+    "react": "^19.2.5"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-react"
+    ]
   }
 }

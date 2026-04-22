@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import path from 'node:path';
 import { INSUFFICIENT_STOCK_ERROR } from '../../src/domain/constants.js';
+// dummy import to ensure watch mode restarts on build
+// eslint-disable-next-line no-unused-vars
+import App from '../../dist/ui/app.js';
 
 describe('Integration Test - CLI', () => {
-  const cliPath = path.resolve('./src/index.js');
+  const cliPath = path.resolve('./dist/ui/cli.js');
 
   const execHandler = (expectedOutput, done) => (error, stdout, stderr) => {
     if (error) {
