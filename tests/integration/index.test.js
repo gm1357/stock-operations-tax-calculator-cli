@@ -5,7 +5,7 @@ import path from 'node:path';
 import { INSUFFICIENT_STOCK_ERROR } from '../../src/domain/constants.js';
 
 describe('Integration Test - CLI', () => {
-  const cliPath = path.resolve('./src/index.js');
+  const cliPath = path.resolve('./dist/ui/cli.js');
 
   const execHandler = (expectedOutput, done) => (error, stdout, stderr) => {
     if (error) {
