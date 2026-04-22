@@ -50,6 +50,14 @@ nvm install
 nvm use
 ```
 
+The terminal UI is built with [Ink](https://github.com/vadimdemedes/ink), which renders React components to the terminal. Because the source uses JSX, it must be compiled with Babel before running.
+
+Build the CLI (outputs to `dist/`):
+
+```bash
+npm run build
+```
+
 Run the CLI tool interactively:
 
 ```bash
@@ -58,7 +66,7 @@ npm start
 # Press Enter again with an empty line to finish input
 
 # Or directly with Node.js
-node src/index.js
+node dist/ui/cli.js
 ```
 
 You can also provide input from a file and even redirect the output to another file:
@@ -68,15 +76,15 @@ You can also provide input from a file and even redirect the output to another f
 npm start < input.txt > output.txt
 
 # Or directly with Node.js
-node src/index.js < input.txt > output.txt
+node dist/ui/cli.js < input.txt > output.txt
 ```
 
 ## Running Tests
 
-This project uses Node.js built-in test runner.
+This project uses Node.js built-in test runner. `npm test` runs `npm run build` first so integration tests execute against the compiled CLI in `dist/`.
 
 ```bash
-# Run all tests
+# Run all tests (builds first)
 npm test
 
 # Run tests in watch mode (auto-rerun on file changes)
