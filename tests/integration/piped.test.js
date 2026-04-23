@@ -7,7 +7,7 @@ import { INSUFFICIENT_STOCK_ERROR } from '../../src/domain/constants.js';
 // eslint-disable-next-line no-unused-vars
 import App from '../../dist/ui/app.js';
 
-describe('Integration Test - CLI', () => {
+describe('Integration Test - Piped flow', () => {
   const cliPath = path.resolve('./dist/ui/cli.js');
 
   const execHandler = (expectedOutput, done) => (error, stdout, stderr) => {
