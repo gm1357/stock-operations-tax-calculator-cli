@@ -1,18 +1,11 @@
-import React, { useEffect } from 'react';
-import { Text, Box, useApp } from 'ink';
+// eslint-disable-next-line no-unused-vars
+import React from 'react';
+import { useStdin } from 'ink';
+import InteractiveApp from './components/InteractiveApp.js';
+import PipedApp from './components/PipedApp.js';
 
-export default function App({ results }) {
-  const { exit } = useApp();
-
-  useEffect(() => {
-    exit();
-  }, [exit]);
-
-  return (
-    <Box flexDirection="column">
-      {results.map((result, index) => (
-        <Text key={index}>{JSON.stringify(result)}</Text>
-      ))}
-    </Box>
-  );
+export default function App() {
+  const { isRawModeSupported } = useStdin();
+  const isInteractive = isRawModeSupported && process.stdin.isTTY;
+  return isInteractive ? <InteractiveApp /> : <PipedApp />;
 }

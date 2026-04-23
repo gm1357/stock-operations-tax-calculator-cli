@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import React from 'react';
+import { PassThrough } from 'node:stream';
 import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
-import { parseLedgers, calculateManyLedgersTaxes } from '../domain/ledgers.js';
 
 meow(
   `
@@ -18,42 +18,16 @@ meow(
   },
 );
 
-async function readPipedStdin() {
-  const lines = [];
-  let buffer = '';
+const isInteractive = Boolean(process.stdin.isTTY);
 
-  process.stdin.setEncoding('utf8');
-
-  for await (const chunk of process.stdin) {
-    buffer += chunk;
-    let newlineIndex;
-    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-      const line = buffer.slice(0, newlineIndex);
-      buffer = buffer.slice(newlineIndex + 1);
-      if (line.trim() === '') {
-        return lines;
-      }
-      lines.push(line);
-    }
-  }
-
-  if (buffer.trim() !== '') {
-    lines.push(buffer);
-  }
-
-  return lines;
-}
+const sink = new PassThrough();
+sink.resume();
 
 try {
-  const lines = await readPipedStdin();
-  const ledgers = parseLedgers(lines);
-  const results = calculateManyLedgersTaxes(ledgers);
-
-  if (results.length === 0) {
-    process.exit(0);
-  }
-
-  const { waitUntilExit } = render(<App results={results} />);
+  const { waitUntilExit } = render(
+    <App />,
+    isInteractive ? undefined : { stdout: sink },
+  );
   await waitUntilExit();
   process.exit(0);
 } catch (error) {
