@@ -6,7 +6,12 @@ import { render } from 'ink-testing-library';
 import InteractiveApp from '../../dist/ui/components/InteractiveApp.js';
 import { INSUFFICIENT_STOCK_ERROR } from '../../src/domain/constants.js';
 
+const LOADER_DELAY_MS = 2000;
+
 const tick = () => new Promise((resolve) => setImmediate(resolve));
+const flush = async () => {
+  for (let i = 0; i < 3; i++) await tick();
+};
 
 const ENTER = '\r';
 
@@ -15,7 +20,8 @@ const renderApp = () => render(React.createElement(InteractiveApp));
 const allOutput = ({ frames }) => frames.join('\n');
 
 describe('Integration Test - Interactive flow', () => {
-  it('processes a single typed ledger and produces tax results', async () => {
+  it('processes a single typed ledger and produces tax results', async (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
     const instance = renderApp();
 
     const ledger =
@@ -30,10 +36,19 @@ describe('Integration Test - Interactive flow', () => {
     instance.stdin.write(ENTER);
     await tick();
 
-    assert.match(allOutput(instance), /\[\{"tax":0\},\{"tax":0\},\{"tax":0\}\]/);
+    assert.match(allOutput(instance), /Processing\.\.\./);
+
+    t.mock.timers.tick(LOADER_DELAY_MS);
+    await flush();
+
+    assert.match(
+      allOutput(instance),
+      /\[\{"tax":0\},\{"tax":0\},\{"tax":0\}\]/,
+    );
   });
 
-  it('processes multiple typed ledgers, one per line', async () => {
+  it('processes multiple typed ledgers, one per line', async (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
     const instance = renderApp();
 
     const first =
@@ -56,6 +71,9 @@ describe('Integration Test - Interactive flow', () => {
     instance.stdin.write(ENTER);
     await tick();
 
+    t.mock.timers.tick(LOADER_DELAY_MS);
+    await flush();
+
     const output = allOutput(instance);
     assert.match(output, /\[\{"tax":0\},\{"tax":0\},\{"tax":0\}\]/);
     assert.match(output, /\[\{"tax":0\},\{"tax":10000\},\{"tax":0\}\]/);
@@ -74,7 +92,8 @@ describe('Integration Test - Interactive flow', () => {
     assert.match(allOutput(instance), /Error:/);
   });
 
-  it('renders insufficient-stock error for oversell', async () => {
+  it('renders insufficient-stock error for oversell', async (t) => {
+    t.mock.timers.enable({ apis: ['setTimeout'] });
     const instance = renderApp();
 
     const ledger =
@@ -87,6 +106,9 @@ describe('Integration Test - Interactive flow', () => {
     await tick();
     instance.stdin.write(ENTER);
     await tick();
+
+    t.mock.timers.tick(LOADER_DELAY_MS);
+    await flush();
 
     assert.match(
       allOutput(instance),

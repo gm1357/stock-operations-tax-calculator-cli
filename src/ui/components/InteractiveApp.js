@@ -7,6 +7,7 @@ import {
   usePaste,
   useCursor,
   useBoxMetrics,
+  useAnimation,
 } from 'ink';
 import stringWidth from 'string-width';
 import {
@@ -14,16 +15,25 @@ import {
   calculateManyLedgersTaxes,
 } from '../../domain/ledgers.js';
 
+const DELAY_MS = 2000;
+const ANIMATION_INTERVAL_MS = 80;
+
 export default function InteractiveApp() {
+  const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   const { exit } = useApp();
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState('');
   const [done, setDone] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { setCursorPosition } = useCursor();
   const ref = useRef(null);
   const { width, height, hasMeasured } = useBoxMetrics(ref);
+  const { frame } = useAnimation({
+    interval: ANIMATION_INTERVAL_MS,
+    isActive: true,
+  });
 
   useInput(
     (character, key) => {
@@ -32,6 +42,10 @@ export default function InteractiveApp() {
       if (key.return) {
         if (input.trim() === '') {
           setDone(true);
+          setLoading(true);
+          setTimeout(() => {
+            setLoading(false);
+          }, DELAY_MS);
         } else {
           setLines((previous) => [...previous, input]);
           setInput('');
@@ -60,12 +74,13 @@ export default function InteractiveApp() {
       setResults(calculateManyLedgersTaxes(ledgers));
     } catch (err) {
       setError(err.message);
+      setLoading(false);
     }
   }, [done, lines]);
 
   useEffect(() => {
-    if (results !== null || error !== null) exit();
-  }, [results, error, exit]);
+    if ((results !== null || error !== null) && !loading) exit();
+  }, [results, error, loading, exit]);
 
   const prompt = '> ';
 
@@ -83,6 +98,8 @@ export default function InteractiveApp() {
   if (done) {
     setCursorPosition(undefined);
   }
+
+  const spinner = spinnerFrames[frame % spinnerFrames.length];
 
   return (
     <Box flexDirection="column" ref={ref}>
@@ -103,7 +120,9 @@ export default function InteractiveApp() {
           </Text>
         </>
       )}
+      {loading && <Text>{spinner} Processing...</Text>}
       {results &&
+        !loading &&
         results.map((result, index) => (
           <Text key={index}>{JSON.stringify(result)}</Text>
         ))}
