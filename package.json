@@ -22,12 +22,14 @@
     "eslint": "^9.35.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.4.0",
+    "ink-testing-library": "^4.0.0",
     "prettier": "3.6.2"
   },
   "dependencies": {
     "ink": "^7.0.1",
     "meow": "^14.1.0",
-    "react": "^19.2.5"
+    "react": "^19.2.5",
+    "string-width": "^8.2.0"
   },
   "babel": {
     "presets": [
