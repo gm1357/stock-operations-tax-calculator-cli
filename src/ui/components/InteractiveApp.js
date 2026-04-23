@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Text, Box, useApp, useInput, usePaste } from 'ink';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Text,
+  Box,
+  useApp,
+  useInput,
+  usePaste,
+  useCursor,
+  useBoxMetrics,
+} from 'ink';
+import stringWidth from 'string-width';
 import {
   parseLedgers,
   calculateManyLedgersTaxes,
@@ -12,6 +21,9 @@ export default function InteractiveApp() {
   const [done, setDone] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const { setCursorPosition } = useCursor();
+  const ref = useRef(null);
+  const { width, height, hasMeasured } = useBoxMetrics(ref);
 
   useInput(
     (character, key) => {
@@ -55,8 +67,25 @@ export default function InteractiveApp() {
     if (results !== null || error !== null) exit();
   }, [results, error, exit]);
 
+  const prompt = '> ';
+
+  if (hasMeasured && !done) {
+    const cursorX = stringWidth(prompt + input) % width;
+    const textWrapped = cursorX === 0 && input.length > 0;
+    const cursorY = textWrapped ? height : height - 1;
+
+    setCursorPosition({
+      x: cursorX,
+      y: cursorY,
+    });
+  }
+
+  if (done) {
+    setCursorPosition(undefined);
+  }
+
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" ref={ref}>
       {!done && (
         <>
           <Text dimColor>
@@ -68,7 +97,10 @@ export default function InteractiveApp() {
               {index + 1}: {line}
             </Text>
           ))}
-          <Text>{'> ' + input}</Text>
+          <Text wrap="hard">
+            {prompt}
+            {input}
+          </Text>
         </>
       )}
       {results &&
