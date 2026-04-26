@@ -1,21 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Text, Box, useApp, useAnimation } from 'ink';
+import { Text, Box, useApp } from 'ink';
 import SelectInput from 'ink-select-input';
-
-const ANIMATION_INTERVAL_MS = 80;
+import Spinner from './Spinner.js';
 
 export default function InteractiveApp() {
-  const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   const { exit } = useApp();
   const [currentOperation, setCurrentOperation] = useState(null);
   const [done, setDone] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { frame } = useAnimation({
-    interval: ANIMATION_INTERVAL_MS,
-    isActive: true,
-  });
   const operationTypeOptions = [
     { label: 'Buy', value: 'buy' },
     { label: 'Sell', value: 'sell' },
@@ -27,8 +21,6 @@ export default function InteractiveApp() {
   useEffect(() => {
     if ((results !== null || error !== null) && !loading) exit();
   }, [results, error, loading, exit]);
-
-  const spinner = spinnerFrames[frame % spinnerFrames.length];
 
   return (
     <Box flexDirection="row" justifyContent="space-between">
@@ -42,7 +34,7 @@ export default function InteractiveApp() {
             />
           </>
         )}
-        {loading && <Text>{spinner} Processing...</Text>}
+        {loading && <Spinner />}
         {results &&
           !loading &&
           results.map((result, index) => (

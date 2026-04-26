@@ -7,19 +7,17 @@ import {
   usePaste,
   useCursor,
   useBoxMetrics,
-  useAnimation,
 } from 'ink';
 import stringWidth from 'string-width';
 import {
   parseLedgers,
   calculateManyLedgersTaxes,
 } from '../../domain/ledgers.js';
+import Spinner from './Spinner.js';
 
 const DELAY_MS = 2000;
-const ANIMATION_INTERVAL_MS = 80;
 
 export default function InteractiveLegacyApp() {
-  const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   const { exit } = useApp();
   const [lines, setLines] = useState([]);
   const [input, setInput] = useState('');
@@ -30,11 +28,6 @@ export default function InteractiveLegacyApp() {
   const { setCursorPosition } = useCursor();
   const ref = useRef(null);
   const { width, height, hasMeasured } = useBoxMetrics(ref);
-  const { frame } = useAnimation({
-    interval: ANIMATION_INTERVAL_MS,
-    isActive: true,
-  });
-
   useInput(
     (character, key) => {
       if (done) return;
@@ -99,8 +92,6 @@ export default function InteractiveLegacyApp() {
     setCursorPosition(undefined);
   }
 
-  const spinner = spinnerFrames[frame % spinnerFrames.length];
-
   return (
     <Box flexDirection="column" ref={ref}>
       {!done && (
@@ -120,7 +111,7 @@ export default function InteractiveLegacyApp() {
           </Text>
         </>
       )}
-      {loading && <Text>{spinner} Processing...</Text>}
+      {loading && <Spinner />}
       {results &&
         !loading &&
         results.map((result, index) => (
