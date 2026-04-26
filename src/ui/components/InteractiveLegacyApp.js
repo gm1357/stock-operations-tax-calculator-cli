@@ -18,7 +18,7 @@ import {
 const DELAY_MS = 2000;
 const ANIMATION_INTERVAL_MS = 80;
 
-export default function InteractiveApp() {
+export default function InteractiveLegacyApp() {
   const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   const { exit } = useApp();
   const [lines, setLines] = useState([]);
@@ -106,8 +106,8 @@ export default function InteractiveApp() {
       {!done && (
         <>
           <Text dimColor>
-            Enter one ledger per line. Press Enter on an empty line to
-            finish. (new flow)
+            Enter one JSON ledger per line. Press Enter on an empty line to
+            finish.
           </Text>
           {lines.map((line, index) => (
             <Text key={index} dimColor>

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 // eslint-disable-next-line no-unused-vars
 import React from 'react';
 import { render } from 'ink-testing-library';
-import InteractiveApp from '../../dist/ui/components/InteractiveApp.js';
+import InteractiveLegacyApp from '../../dist/ui/components/InteractiveLegacyApp.js';
 import { INSUFFICIENT_STOCK_ERROR } from '../../src/domain/constants.js';
 
 const LOADER_DELAY_MS = 2000;
@@ -15,11 +15,11 @@ const flush = async () => {
 
 const ENTER = '\r';
 
-const renderApp = () => render(React.createElement(InteractiveApp));
+const renderApp = () => render(React.createElement(InteractiveLegacyApp));
 
 const allOutput = ({ frames }) => frames.join('\n');
 
-describe('Integration Test - Interactive flow', () => {
+describe('Integration Test - Interactive legacy flow', () => {
   it('processes a single typed ledger and produces tax results', async (t) => {
     t.mock.timers.enable({ apis: ['setTimeout'] });
     const instance = renderApp();
