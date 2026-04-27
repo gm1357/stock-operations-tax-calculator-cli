@@ -2,10 +2,16 @@
 import React from 'react';
 import { useStdin } from 'ink';
 import InteractiveApp from './components/InteractiveApp.js';
+import InteractiveLegacyApp from './components/InteractiveLegacyApp.js';
 import PipedApp from './components/PipedApp.js';
 
-export default function App() {
+export default function App({ raw }) {
   const { isRawModeSupported } = useStdin();
   const isInteractive = isRawModeSupported && process.stdin.isTTY;
-  return isInteractive ? <InteractiveApp /> : <PipedApp />;
+
+  if (!isInteractive) {
+    return <PipedApp />;
+  }
+
+  return raw ? <InteractiveLegacyApp /> : <InteractiveApp />;
 }

@@ -5,16 +5,26 @@ import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
 
-meow(
+const cli = meow(
   `
 		Usage
 		  $ stock-operations-tax-calculator-cli
+
+		Options
+		  --raw, -r  Use legacy interactive mode
 
 		Reads one JSON ledger per line from stdin until an empty line,
 		then prints tax results as JSON, one per line.
 	`,
   {
     importMeta: import.meta,
+    flags: {
+      raw: {
+        type: 'boolean',
+        shortFlag: 'r',
+        default: false,
+      },
+    },
   },
 );
 
@@ -25,7 +35,7 @@ sink.resume();
 
 try {
   const { waitUntilExit } = render(
-    <App />,
+    <App raw={cli.flags.raw} />,
     isInteractive ? undefined : { stdout: sink },
   );
   await waitUntilExit();

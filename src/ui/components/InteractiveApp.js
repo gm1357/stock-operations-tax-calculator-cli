@@ -1,132 +1,157 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Text,
-  Box,
-  useApp,
-  useInput,
-  usePaste,
-  useCursor,
-  useBoxMetrics,
-  useAnimation,
-} from 'ink';
-import stringWidth from 'string-width';
-import {
-  parseLedgers,
-  calculateManyLedgersTaxes,
-} from '../../domain/ledgers.js';
-
-const DELAY_MS = 2000;
-const ANIMATION_INTERVAL_MS = 80;
+import React, { useEffect, useState } from 'react';
+import { Text, Box, useApp, useInput } from 'ink';
+import SelectInput from 'ink-select-input';
+import Spinner from './Spinner.js';
+import { calculateManyLedgersTaxes } from '../../domain/ledgers.js';
 
 export default function InteractiveApp() {
-  const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   const { exit } = useApp();
-  const [lines, setLines] = useState([]);
-  const [input, setInput] = useState('');
-  const [done, setDone] = useState(false);
+  const [currentOperation, setCurrentOperation] = useState(null);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const { setCursorPosition } = useCursor();
-  const ref = useRef(null);
-  const { width, height, hasMeasured } = useBoxMetrics(ref);
-  const { frame } = useAnimation({
-    interval: ANIMATION_INTERVAL_MS,
-    isActive: true,
-  });
+  const [step, setStep] = useState('operation-type');
+  const [unitCost, setUnitCost] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [operations, setOperations] = useState([]);
+
+  const operationTypeOptions = [
+    { label: 'Buy', value: 'buy' },
+    { label: 'Sell', value: 'sell' },
+  ];
+
+  useEffect(() => {
+    if (results !== null || error !== null) exit();
+  }, [results, error, exit]);
 
   useInput(
     (character, key) => {
-      if (done) return;
-
-      if (key.return) {
-        if (input.trim() === '') {
-          setDone(true);
-          setLoading(true);
-          setTimeout(() => {
-            setLoading(false);
-          }, DELAY_MS);
-        } else {
-          setLines((previous) => [...previous, input]);
-          setInput('');
+      if (step === 'unit-cost') {
+        if (key.return) {
+          setStep('quantity');
+        } else if (key.backspace || key.delete) {
+          setUnitCost((current) => current.slice(0, -1));
+        } else if (character && (!isNaN(character) || character === '.')) {
+          setUnitCost((current) => current + character);
         }
-      } else if (key.backspace || key.delete) {
-        setInput((current) => current.slice(0, -1));
-      } else if (character) {
-        setInput((current) => current + character);
+      }
+
+      if (step === 'quantity') {
+        if (key.return) {
+          const operation = {
+            operation: currentOperation?.value,
+            'unit-cost': parseFloat(unitCost),
+            quantity: parseInt(quantity),
+          };
+          setOperations((previous) => [...previous, operation]);
+          setStep('add-more');
+        } else if (key.backspace || key.delete) {
+          setQuantity((current) => current.slice(0, -1));
+        } else if (character && !isNaN(character)) {
+          setQuantity((current) => current + character);
+        }
       }
     },
-    { isActive: !done },
+    { isActive: step === 'unit-cost' || step === 'quantity' },
   );
 
-  usePaste((content) => {
-    const pastedLines = content.split(/\r\n|\n|\r/);
-    const [lastLine, ...rest] = pastedLines.reverse();
+  const handleSelectOperationType = (operationType) => {
+    setCurrentOperation(operationType);
+    setStep('unit-cost');
+  };
 
-    setLines((previous) => [...previous, ...rest]);
-    setInput((current) => current + lastLine);
-  });
-
-  useEffect(() => {
-    if (!done) return;
-    try {
-      const ledgers = parseLedgers(lines);
-      setResults(calculateManyLedgersTaxes(ledgers));
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
+  const handleSelectAddMore = (addMore) => {
+    if (addMore.value === 'yes') {
+      setStep('operation-type');
+      setCurrentOperation(null);
+      setUnitCost('');
+      setQuantity('');
+    } else {
+      setStep('processing');
+      setTimeout(() => {
+        setResults(calculateManyLedgersTaxes([operations]));
+        setStep('results');
+      }, 2000);
     }
-  }, [done, lines]);
+  };
 
-  useEffect(() => {
-    if ((results !== null || error !== null) && !loading) exit();
-  }, [results, error, loading, exit]);
+  const renderSelectStep = () => (
+    <>
+      <Text dimColor>Select the operation type</Text>
+      <SelectInput
+        items={operationTypeOptions}
+        onSelect={handleSelectOperationType}
+      />
+    </>
+  );
 
-  const prompt = '> ';
+  const renderUnitCostStep = () => (
+    <>
+      <Text
+        dimColor
+      >{`Enter the unit cost for ${currentOperation?.label} operation`}</Text>
+      <Text>{unitCost}</Text>
+    </>
+  );
 
-  if (hasMeasured && !done) {
-    const cursorX = stringWidth(prompt + input) % width;
-    const textWrapped = cursorX === 0 && input.length > 0;
-    const cursorY = textWrapped ? height : height - 1;
+  const renderQuantityStep = () => (
+    <>
+      <Text
+        dimColor
+      >{`Enter the quantity for ${currentOperation?.label} operation`}</Text>
+      <Text>{quantity}</Text>
+    </>
+  );
 
-    setCursorPosition({
-      x: cursorX,
-      y: cursorY,
-    });
-  }
+  const renderAddMoreStep = () => (
+    <>
+      <Text dimColor>Add more operations?</Text>
+      <SelectInput
+        items={[
+          { label: 'Yes', value: 'yes' },
+          { label: 'No', value: 'no' },
+        ]}
+        onSelect={handleSelectAddMore}
+      />
+    </>
+  );
 
-  if (done) {
-    setCursorPosition(undefined);
-  }
-
-  const spinner = spinnerFrames[frame % spinnerFrames.length];
+  const renderResultsStep = () => (
+    <>
+      <Text>Results</Text>
+      {results.map((result, index) => (
+        <Text dimColor key={index}>
+          {JSON.stringify(result)}
+        </Text>
+      ))}
+    </>
+  );
 
   return (
-    <Box flexDirection="column" ref={ref}>
-      {!done && (
-        <>
-          <Text dimColor>
-            Enter one JSON ledger per line. Press Enter on an empty line to
-            finish.
-          </Text>
-          {lines.map((line, index) => (
-            <Text key={index} dimColor>
-              {index + 1}: {line}
-            </Text>
-          ))}
-          <Text wrap="hard">
-            {prompt}
-            {input}
-          </Text>
-        </>
-      )}
-      {loading && <Text>{spinner} Processing...</Text>}
-      {results &&
-        !loading &&
-        results.map((result, index) => (
-          <Text key={index}>{JSON.stringify(result)}</Text>
+    <Box flexDirection="row" justifyContent="space-between">
+      <Box flexGrow={1} flexDirection="column" borderStyle="round" padding={1}>
+        {step === 'operation-type' && renderSelectStep()}
+        {step === 'unit-cost' && renderUnitCostStep()}
+        {step === 'quantity' && renderQuantityStep()}
+        {step === 'add-more' && renderAddMoreStep()}
+        {step === 'processing' && <Spinner />}
+        {step === 'results' && renderResultsStep()}
+        {error && <Text color="red">Error: {error} </Text>}
+      </Box>
+      <Box flexDirection="column" borderStyle="round" padding={1}>
+        <Text>List of operations</Text>
+        {operations.map((operation, index) => (
+          <Text
+            dimColor
+            key={index}
+          >{`${index + 1}: ${JSON.stringify(operation)}`}</Text>
         ))}
-      {error && <Text color="red">Error: {error} </Text>}
+      </Box>
+      <Box flexDirection="column" borderStyle="round" padding={1}>
+        <Text>Current operation</Text>
+        <Text dimColor>Operation: {currentOperation?.label}</Text>
+        <Text dimColor>Unit cost: {unitCost}</Text>
+        <Text dimColor>Quantity: {quantity}</Text>
+      </Box>
     </Box>
   );
 }
