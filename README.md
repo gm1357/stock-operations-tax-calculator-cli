@@ -58,6 +58,23 @@ Build the CLI (outputs to `dist/`):
 npm run build
 ```
 
+#### Install globally with `npm link`
+
+The package exposes a `sotcc` bin entry, so after building you can symlink it into your global `node_modules` and run it from anywhere:
+
+```bash
+npm run build
+npm link
+
+# Now you can invoke the CLI directly
+sotcc
+sotcc --about
+sotcc < input.txt > output.txt
+
+# To remove the global symlink later
+npm unlink -g stock-operations-tax-calculator-cli
+```
+
 Run the CLI tool interactively:
 
 ```bash

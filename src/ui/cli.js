@@ -8,7 +8,7 @@ import App from './app.js';
 const cli = meow(
   `
     Usage
-      $ stock-operations-tax-calculator-cli
+      $ sotcc [options]
 
     Options
       --raw, -r  Use legacy interactive mode (one JSON ledger per line)
@@ -17,6 +17,9 @@ const cli = meow(
 
     Interactively enter operations details to calculate taxes,
     or pipe a file with one JSON ledger per line.
+
+    Read from stdin in piped mode:
+      $ cat ledgers.txt | sotcc
   `,
   {
     importMeta: import.meta,
