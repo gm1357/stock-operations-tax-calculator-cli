@@ -79,6 +79,26 @@ npm start < input.txt > output.txt
 node dist/ui/cli.js < input.txt > output.txt
 ```
 
+### CLI Flags
+
+| Flag           | Description                                                              |
+| -------------- | ------------------------------------------------------------------------ |
+| `--raw`, `-r`  | Use the legacy interactive mode (one JSON ledger per line, plain stdin). |
+| `--about`      | Show information about the project and exit.                             |
+| `--help`       | Show the usage help message.                                             |
+
+The default interactive mode is a TUI built with [Ink](https://github.com/vadimdemedes/ink) that guides you through entering operations. Pass `--raw` if you prefer the original line-based stdin flow. When input is piped, the CLI automatically switches to non-interactive mode regardless of flags.
+
+```bash
+# Pass flags through npm with `--`
+npm start -- --about
+npm start -- --raw
+
+# Or directly with Node.js
+node dist/ui/cli.js --about
+node dist/ui/cli.js --raw
+```
+
 ## Running Tests
 
 This project uses Node.js built-in test runner. `npm test` runs `npm run build` first so integration tests execute against the compiled CLI in `dist/`.
