@@ -11,9 +11,12 @@
     "test": "node --test",
     "test:watch": "concurrently -n build,test \"npm:build:watch\" \"node --test --watch\""
   },
-  "author": "",
+  "author": "Gabriel Machado",
   "license": "ISC",
-  "description": "",
+  "description": "A CLI tool for calculating taxes on stock operations",
+  "bin": {
+    "sotcc": "./dist/ui/cli.js"
+  },
   "devDependencies": {
     "@babel/cli": "^7.28.6",
     "@babel/preset-react": "^7.28.5",

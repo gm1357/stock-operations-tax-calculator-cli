@@ -2,6 +2,8 @@
 
 A simple CLI tool to calculate taxes on stock operations based on specific tax rules.
 
+<img src="demo.gif" />
+
 ## Overview
 
 This tool calculates taxes for stock operations based on the following rules:
@@ -58,6 +60,23 @@ Build the CLI (outputs to `dist/`):
 npm run build
 ```
 
+#### Install globally with `npm link`
+
+The package exposes a `sotcc` bin entry, so after building you can symlink it into your global `node_modules` and run it from anywhere:
+
+```bash
+npm run build
+npm link
+
+# Now you can invoke the CLI directly
+sotcc
+sotcc --about
+sotcc < input.txt > output.txt
+
+# To remove the global symlink later
+npm unlink -g stock-operations-tax-calculator-cli
+```
+
 Run the CLI tool interactively:
 
 ```bash
@@ -81,11 +100,11 @@ node dist/ui/cli.js < input.txt > output.txt
 
 ### CLI Flags
 
-| Flag           | Description                                                              |
-| -------------- | ------------------------------------------------------------------------ |
-| `--raw`, `-r`  | Use the legacy interactive mode (one JSON ledger per line, plain stdin). |
-| `--about`      | Show information about the project and exit.                             |
-| `--help`       | Show the usage help message.                                             |
+| Flag          | Description                                                              |
+| ------------- | ------------------------------------------------------------------------ |
+| `--raw`, `-r` | Use the legacy interactive mode (one JSON ledger per line, plain stdin). |
+| `--about`     | Show information about the project and exit.                             |
+| `--help`      | Show the usage help message.                                             |
 
 The default interactive mode is a TUI built with [Ink](https://github.com/vadimdemedes/ink) that guides you through entering operations. Pass `--raw` if you prefer the original line-based stdin flow. When input is piped, the CLI automatically switches to non-interactive mode regardless of flags.
 
