@@ -27,10 +27,10 @@ export default function InteractiveApp() {
     (character, key) => {
       if (step === 'unit-cost') {
         if (key.return) {
-          setStep("quantity");
+          setStep('quantity');
         } else if (key.backspace || key.delete) {
           setUnitCost((current) => current.slice(0, -1));
-        } else if (character) {
+        } else if (character && (!isNaN(character) || character === '.')) {
           setUnitCost((current) => current + character);
         }
       }
@@ -39,14 +39,14 @@ export default function InteractiveApp() {
         if (key.return) {
           const operation = {
             operation: currentOperation?.value,
-            "unit-cost": parseFloat(unitCost),
+            'unit-cost': parseFloat(unitCost),
             quantity: parseInt(quantity),
           };
           setOperations((previous) => [...previous, operation]);
-          setStep("add-more");
+          setStep('add-more');
         } else if (key.backspace || key.delete) {
           setQuantity((current) => current.slice(0, -1));
-        } else if (character) {
+        } else if (character && !isNaN(character)) {
           setQuantity((current) => current + character);
         }
       }
@@ -86,14 +86,18 @@ export default function InteractiveApp() {
 
   const renderUnitCostStep = () => (
     <>
-      <Text dimColor>{`Enter the unit cost for ${currentOperation?.label} operation`}</Text>
+      <Text
+        dimColor
+      >{`Enter the unit cost for ${currentOperation?.label} operation`}</Text>
       <Text>{unitCost}</Text>
     </>
   );
 
   const renderQuantityStep = () => (
     <>
-      <Text dimColor>{`Enter the quantity for ${currentOperation?.label} operation`}</Text>
+      <Text
+        dimColor
+      >{`Enter the quantity for ${currentOperation?.label} operation`}</Text>
       <Text>{quantity}</Text>
     </>
   );
@@ -115,7 +119,9 @@ export default function InteractiveApp() {
     <>
       <Text>Results</Text>
       {results.map((result, index) => (
-        <Text dimColor key={index}>{JSON.stringify(result)}</Text>
+        <Text dimColor key={index}>
+          {JSON.stringify(result)}
+        </Text>
       ))}
     </>
   );
@@ -134,7 +140,10 @@ export default function InteractiveApp() {
       <Box flexDirection="column" borderStyle="round" padding={1}>
         <Text>List of operations</Text>
         {operations.map((operation, index) => (
-          <Text dimColor key={index}>{`${index + 1}: ${JSON.stringify(operation)}`}</Text>
+          <Text
+            dimColor
+            key={index}
+          >{`${index + 1}: ${JSON.stringify(operation)}`}</Text>
         ))}
       </Box>
       <Box flexDirection="column" borderStyle="round" padding={1}>
